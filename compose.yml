@@ -1,0 +1,35 @@
+version: "3.7"
+
+services: 
+  gogs:
+    container_name: gogs
+    image: gogs/gogs
+    ports:
+      - "22:22"
+    volumes:
+      - gogs-data:/data
+
+  proxy:
+    depends_on:
+      - gogs
+    image: nginx:1.17.8-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: on-failure
+    volumes:
+      - ./proxy/conf.d:/etc/nginx/conf.d:ro,cached
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: hijack
+
+
+volumes:
+  gogs-data:
